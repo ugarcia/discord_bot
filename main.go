@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"regexp"
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
@@ -13,11 +14,19 @@ import (
 // Variables used for command line parameters
 var (
 	Token string
+	OverlayRegex *regexp.Regexp
 )
 
 func init() {
 	flag.StringVar(&Token, "t", "", "Bot Token")
 	flag.Parse()
+
+	if re, err := regexp.Compile(".*overlay.*"); err == nil {
+		OverlayRegex = re
+	} else {
+		fmt.Println("error compiling regexp,", err)
+		return
+	}
 }
 
 func main() {
@@ -66,5 +75,9 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// If the message is "pong" reply with "Ping!"
 	if m.Content == "pong" {
 		s.ChannelMessageSend(m.ChannelID, "Ping!")
+	}
+
+	if OverlayRegex.MatchString(m.Content) {
+		s.ChannelMessageSend(m.ChannelID, "Shut up your fucking mouth and learn to read, damn asshole!")
 	}
 }
