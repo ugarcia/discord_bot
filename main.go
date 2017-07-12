@@ -14,6 +14,7 @@ import (
 // Variables used for command line parameters
 var (
 	Token string
+	CommandRegex *regexp.Regexp
 	OverlayRegex *regexp.Regexp
 )
 
@@ -21,10 +22,20 @@ func init() {
 	flag.StringVar(&Token, "t", "", "Bot Token")
 	flag.Parse()
 
-	if re, err := regexp.Compile(".*overlay.*"); err == nil {
+	var re *regexp.Regexp
+	var err error
+
+	if re, err = regexp.Compile(" *!([a-z]+) *"); err == nil {
+		CommandRegex = re
+	} else {
+		fmt.Println("error compiling command regexp,", err)
+		return
+	}
+
+	if re, err = regexp.Compile(".*overlay.*"); err == nil {
 		OverlayRegex = re
 	} else {
-		fmt.Println("error compiling regexp,", err)
+		fmt.Println("error compiling overlay regexp,", err)
 		return
 	}
 }
@@ -80,4 +91,24 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if OverlayRegex.MatchString(m.Content) {
 		s.ChannelMessageSend(m.ChannelID, "Shut up your fucking mouth and learn to read, damn asshole!")
 	}
+
+	if cmd := CommandRegex.FindStringSubmatch(m.Content); len(cmd) > 1 {
+
+		switch c {
+			case '&':
+				esc = "&amp;"
+			case '\'':
+				esc = "&apos;"
+			case '<':
+				esc = "&lt;"
+			case '>':
+				esc = "&gt;"
+			case '"':
+				esc = "&quot;"
+			default:
+				panic("unrecognized escape character")
+		}
+
+		s.ChannelMessageSend(m.ChannelID, "Matched: " + cmd[1] + "\n https://loots.com")
+	}	
 }
