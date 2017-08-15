@@ -94,21 +94,32 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	if cmd := CommandRegex.FindStringSubmatch(m.Content); len(cmd) > 1 {
 
-		switch c {
-			case '&':
-				esc = "&amp;"
-			case '\'':
-				esc = "&apos;"
-			case '<':
-				esc = "&lt;"
-			case '>':
-				esc = "&gt;"
-			case '"':
-				esc = "&quot;"
+		res := ""
+
+		switch cmd[1] {
+			case "yo":
+				res = "ya"
+			case "help":
+				res = "Commands:\n!help\n!money\n!start\n!payouts\n!support\n!mods\n!waiting\n!intro"
+			case "money":
+				res = "How much money to make -> https://loots.com/en/account/how-loots-works"
+			case "start":
+				res = "How to get started -> https://loots.com/en/account/how-loots-works"
+			case "payouts":
+				res = "Next payout: [DATE] - will run for 3 days, finished on [DATE+3]"
+			case "support":
+				res = "Support form: -> https://loots.com/en/account/support"
+			case "mods":
+				res = "mod names, languages, timezone\nand some more to 'auto-post' every x hours (in addition to use it as a 'manual' command)"
+			case "waiting":
+				res = "Current waiting list status: ['confirmed' entries], current waiting time: 14 days, join now [https://loots.com/en/auth/waiting]"
+			case "intro":
+				res = "How loots works -> https://loots.com/en/account/how-loots-works"
 			default:
-				panic("unrecognized escape character")
+				res = "Unrecognized command, what the heck are you typing?"
+				fmt.Println("Unrecognized Command: ", cmd[1])
 		}
 
-		s.ChannelMessageSend(m.ChannelID, "Matched: " + cmd[1] + "\n https://loots.com")
+		s.ChannelMessageSend(m.ChannelID, res)
 	}	
 }
